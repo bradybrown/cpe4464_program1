@@ -59,7 +59,7 @@
  *   included in the buffer passed in via addr and len, the function will
  *   return 0 when the checksum is correct and non-zero otherwise.
  */
-unsigned short in_cksum(unsigned short *addr,int len)
+unsigned short in_cksum(unsigned short *addr, int len)
 {
         register int sum = 0;
         u_short answer = 0;

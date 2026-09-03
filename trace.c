@@ -86,7 +86,7 @@ int main(int argc, char *argv[])
     const char *pcapFilename = argv[1];
 
     char errbuf[PCAP_ERRBUF_SIZE];
-    u_char *pkt_data;
+    const u_char *pkt_data;
     struct pcap_pkthdr *pkt_header;
 
     int result;
@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    u_int64 packet_num = 0;
+    uint64_t packet_num = 1;
 
     while ((result = pcap_next_ex(handle, &pkt_header, &pkt_data)) >= 0)
     {
@@ -110,6 +110,7 @@ int main(int argc, char *argv[])
 
         printf("\n");
         process_packets(packet_num, pkt_header, pkt_data);
+        packet_num++;
     }
 
     if (result == PCAP_ERROR) {
@@ -118,19 +119,24 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
     else if (result == PCAP_ERROR_BREAK) {
-        printf("Successfully reached the end of the file."); // TODO: Remove later
+        // printf("Successfully reached the end of the file."); // TODO: Remove later
         pcap_close(handle);
         return EXIT_SUCCESS;
     }
 
-    printf("Hmmm, we made it to the end of main."); // TODO: Remove later
+    // printf("Hmmm, we made it to the end of main."); // TODO: Remove later
     pcap_close(handle);
     return EXIT_FAILURE;
 }
 
 void process_packets(uint64_t packet_num, struct pcap_pkthdr *header, const u_char *data)
 {
-    printf("Packet number: %lld  Packet Len: %d", (unsigned long long)packet_num, header->len);
+    printf("Packet number: %llu  Packet Len: %u", (unsigned long long)packet_num, header->len);
+
+    if (header->caplen < 14) {
+        printf("\nUnknown PDU"); // TODO: Verify that this check works
+        return;
+    }
 
     // Ethernet header: 1st 14 bytes
     printf("\n\n\tEthernet Header");
@@ -152,7 +158,7 @@ void process_packets(uint64_t packet_num, struct pcap_pkthdr *header, const u_ch
             printf("\n\t\tType: IP");
             printf("\n");
             const IPv4_header *ip_header = (IPv4_header *)(data + sizeof(Eth_header));
-            parse_IP(ip_header, (data + sizeof(Eth_header)));
+            parse_IP(ip_header, header->caplen);
             break;
         }
             
@@ -166,26 +172,22 @@ void process_packets(uint64_t packet_num, struct pcap_pkthdr *header, const u_ch
 
         default: {
             printf("\n\t\tType: Unknown");  // TODO: Do i need Unknown PDU?
-            printf("\n");
         }
-
     }
-
-   
-
 }
 
 
-void parse_IP(IPv4_header *ip_header, int len) {
-    // IP Header: Next 20 bytes
-    if (len < 20) {
+void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
+    // IP Header: Next 20 to 60 Bytes
+    int len = (ip_header->ver_hl & 0x0F) * 4;
+    if (caplen < 20) {
         printf("Unknown PDU\n");
         return;
     }
-    ip_header->ver_hl
+
     printf("\n\tIP Header");
     printf("\n\t\tTOS: 0x%x", ip_header->tos);
-    printf("\n\t\tTTL: %ld", ip_header->ttl);
+    printf("\n\t\tTTL: %u", ip_header->ttl);
     printf("\n\t\tProtocol: ");
     
     uint8_t protocol = 0;
@@ -194,14 +196,17 @@ void parse_IP(IPv4_header *ip_header, int len) {
         case 1: {
             printf("ICMP");
             protocol = 1;
+            break;
         }
         case 6: {
             printf("TCP");
             protocol = 6;
+            break;
         }
         case 17: {
             printf("UDP");
             protocol = 17;
+            break;
         }
         default: {
             printf("Unknown");
@@ -211,8 +216,8 @@ void parse_IP(IPv4_header *ip_header, int len) {
     }
 
 
-    int16_t ck_sum = (ip_header->checksum[0] << 8 | ip_header->checksum[1])
-    if (in_cksum((unsigned short *)ip_header, (int)ip_header_len) == 0) {
+    uint16_t ck_sum = (ip_header->checksum[0] << 8 | ip_header->checksum[1]);
+    if (in_cksum((unsigned short *)ip_header, (int)len) == 0) {
         printf("\n\t\tChecksum: Correct (0x%x)", ck_sum);
     } 
     else {
@@ -231,7 +236,7 @@ void parse_IP(IPv4_header *ip_header, int len) {
     switch (protocol) {
         case 1: {
             printf("\n\tICMP Header\n\t\tType: ");
-            switch (ntohs(ip_header + len)) {
+            switch (ntohs((*((uint16_t *)ip_header + len)))) {
                 case 0: printf("Reply");
                 case 8: printf("Request");
                 default: printf("Unknown");
@@ -249,7 +254,6 @@ void parse_IP(IPv4_header *ip_header, int len) {
         default: printf("Unknown");
     }    
 }
-
 
 void parse_ARP(ARP_header *arp_header) {
     printf("\n\tARP Request/Reply");
@@ -281,36 +285,41 @@ void parse_ARP(ARP_header *arp_header) {
 }
 
 void parse_TCP(TCP_header *tcp_header) {
-    // TCP Header: Next 20 bytes
+    // TCP Header: 20 to 60 Bytes
+    int len = (tcp_header->data_offset_reserved >> 4) * 4;
     printf("\n\tTCP Header");
-    printf("\n\t\tSource Port: ");
+    printf("\n\t\tSource Port:  ");
     print_port(ntohs(tcp_header->src_port));
-    printf("\n\t\tDest Port: ");
+    printf("\n\t\tDest Port:  ");
     print_port(ntohs(tcp_header->dest_port));
-    printf("\n\t\tSequence Number: %d", ntohs(tcp_header->sequence_num));
-    printf("\n\t\tAck Number: %d", ntohs(tcp_header->ack_num));
+    printf("\n\t\tSequence Number: %lu", ntohl(tcp_header->sequence_num));
+    printf("\n\t\tACK Number: %lu", ntohl(tcp_header->ack_num));
     
-    if (tcp_header->flags & (1 << 6)) {printf("\n\t\tSYN Flag: Yes");}
+    if (tcp_header->flags & (1 << 1)) {printf("\n\t\tSYN Flag: Yes");}
     else {printf("\n\t\tSYN Flag: No");}
-    if (tcp_header->flags & (1 << 5)) {printf("\n\t\tRST Flag: Yes");}
+    if (tcp_header->flags & (1 << 2)) {printf("\n\t\tRST Flag: Yes");}
     else {printf("\n\t\tRST Flag: No");}
-    if (tcp_header->flags & (1 << 7)) {printf("\n\t\tFIN Flag: Yes");}
+    if (tcp_header->flags & (1 << 0)) {printf("\n\t\tFIN Flag: Yes");}
     else {printf("\n\t\tFIN Flag: No");}
 
-    printf("\n\t\tWindow Size: %d", tcp_header->window_size);
+    printf("\n\t\tWindow Size: %u", tcp_header->window_size);
     
     uint16_t ck_sum = (tcp_header->checksum[0] << 8 | tcp_header->checksum[1])
-    if (in_cksum(ck_sum, 2) == 0) {
-        printf("\n\t\tChecksum: Correct (0x%4x)", ck_sum);
+    if (in_cksum((unsigned short *)tcp_header, len) == 0) {
+        printf("\n\t\tChecksum: Correct (0x%x)", ck_sum);
     } 
     else {
-        printf("\n\t\tChecksum: Incorrect (0x%4x)", ck_sum);
+        printf("\n\t\tChecksum: Incorrect (0x%x)", ck_sum);
     }
     printf("\n");
 }
 
 void parse_UDP(UDP_header *udp_header) {
     printf("\n\tUDP Header");
+    printf("\n\t\tSource Port: ");
+    print_port(ntohs(udp_header->src_port));
+    printf("\n\t\tDest Port: ");
+    print_port(ntohs(udp_header->dest_port));
 }
 
 void print_port(uint16_t port) {

@@ -220,9 +220,9 @@ void parse_ARP(const ARP_header *arp_header) {
     printf("\n\t\tTarget IP: %s", inet_ntoa(ip_dest));
 }
 
-void parse_TCP(const TCP_header *tcp_header) {
+void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     // TCP Header: 20 to 60 Bytes
-    int len = (tcp_header->data_offset_reserved >> 4) * 4;
+    uint16_t tcp_len = (tcp_header->data_offset_reserved >> 4) * 4;
     printf("\n\tTCP Header");
     printf("\n\t\tSource Port:  ");
     print_port(ntohs(tcp_header->src_port));
@@ -238,16 +238,43 @@ void parse_TCP(const TCP_header *tcp_header) {
     if (tcp_header->flags & (1 << 0)) {printf("\n\t\tFIN Flag: Yes");}
     else {printf("\n\t\tFIN Flag: No");}
 
-    printf("\n\t\tWindow Size: %u", tcp_header->window_size);
+    printf("\n\t\tWindow Size: %u", (unsigned int)ntohs(tcp_header->window_size));
     
+    // TODO: ck_sum var is good. Incorrect input to the un_cksum() function
     uint16_t ck_sum = ntohs(tcp_header->checksum);
-    if (in_cksum((unsigned short *)tcp_header, len) == 0) {
+
+    // int ip_len = (ip_header->ver_hl & 0x0F) * 4;
+    uint16_t pseudo_size = 12; // 12 Bytes for IPv4 part  
+    pseudo_size += (uint16_t)tcp_len;
+    pseudo_size += (pseudo_size % 2); // If odd number, pad w/ extra byte that is zero  
+    uint8_t *pseudo_header = malloc((size_t)pseudo_size); 
+    if (pseudo_header == NULL) {
+        fprintf(stderr, "Unable to allocate checksum buffer\n");
+        return;
+    }
+    
+    // Set all memory to 0 before filling
+    memset(pseudo_header, 0, pseudo_size);
+    memcpy(pseudo_header, ip_header->src_ip, 4);
+    memcpy(pseudo_header + 4, ip_header->dest_ip, 4);
+    pseudo_header[8] = 0; // Reserved byte, set to 0
+    pseudo_header[9] = 0x06;
+
+    uint16_t network_tcp_len = htons((uint16_t)tcp_len);
+    memcpy(pseudo_header + 10, &network_tcp_len, sizeof(network_tcp_len));
+    uint8_t pseudo_header_offset = 10 + sizeof(network_tcp_len);
+    memcpy(pseudo_header + pseudo_header_offset, tcp_header, tcp_len);
+    pseudo_header[pseudo_header_offset + 16] = 0x00;
+    pseudo_header[pseudo_header_offset + 17] = 0x00;
+
+    if (in_cksum((unsigned short *)pseudo_header, (int)pseudo_size) == 0) {
         printf("\n\t\tChecksum: Correct (0x%x)", (unsigned int)ck_sum);
     } 
     else {
         printf("\n\t\tChecksum: Incorrect (0x%x)", (unsigned int)ck_sum);
     }
     printf("\n");
+    free(pseudo_header);
 }
 
 void parse_UDP(const UDP_header *udp_header) {

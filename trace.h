@@ -37,14 +37,6 @@ typedef struct IPv4_header {
     uint8_t dest_ip[4];
 } IPv4_header;
 
-typedef struct ICMP_header {
-    uint8_t type;
-    uint8_t code;                   // We dont use
-    uint16_t checksum;              // We dont print
-    uint16_t identifier;            // We dont use
-    uint16_t sequence_num;          // We dont use
-} ICMP_header;
-
 typedef struct TCP_header {
     uint16_t src_port;
     uint16_t dest_port;
@@ -56,6 +48,14 @@ typedef struct TCP_header {
     uint16_t checksum;
     uint16_t urgent_pointer;        // We dont use
 } TCP_header;
+
+typedef struct ICMP_header {
+    uint8_t type;
+    uint8_t code;                   // We dont use
+    uint16_t checksum;              // We dont print
+    uint16_t identifier;            // We dont use
+    uint16_t sequence_num;          // We dont use
+} ICMP_header;
 
 typedef struct UDP_header {
     uint16_t src_port;

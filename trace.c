@@ -144,8 +144,8 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
         default: {
             printf("Unknown");
             protocol = 0;
+            break;
         } 
-        printf("\n");
     }
 
 
@@ -180,7 +180,8 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
                     printf("Request");
                     break;
                 }
-                default: printf("Unknown");
+                default: 
+                    break; // Protocol was already printed as Unknown
             }
             break;
         }

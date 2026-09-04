@@ -261,11 +261,8 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     pseudo_header[9] = 0x06;
 
     uint16_t network_tcp_len = htons((uint16_t)tcp_len);
-    memcpy(pseudo_header + 10, &network_tcp_len, sizeof(network_tcp_len));
-    uint8_t pseudo_header_offset = 10 + sizeof(network_tcp_len);
-    memcpy(pseudo_header + pseudo_header_offset, tcp_header, tcp_len);
-    pseudo_header[pseudo_header_offset + 16] = 0x00;
-    pseudo_header[pseudo_header_offset + 17] = 0x00;
+    memcpy(pseudo_header + 10, &network_tcp_len, 2);
+    memcpy(pseudo_header + 12, tcp_header, tcp_len);
 
     uint16_t ck_sum = ntohs(tcp_header->checksum);
     if (in_cksum((unsigned short *)pseudo_header, (int)pseudo_size) == 0) {

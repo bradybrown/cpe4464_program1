@@ -171,7 +171,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
     switch (protocol) {
         case 1: {
             printf("\n\tICMP Header\n\t\tType: ");
-            switch (ntohs(*(uint16_t *)next_header)) {
+            switch (*(uint16_t *)next_header) {
                 case 0: {
                     printf("Reply");
                     break;
@@ -276,7 +276,6 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     else {
         printf("\n\t\tChecksum: Incorrect (0x%x)", (unsigned int)ck_sum);
     }
-    printf("\n");
     free(pseudo_header);
 }
 

@@ -166,10 +166,12 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
     printf("\n\t\tDest IP: %s", inet_ntoa(ip_dest));
     printf("\n");
 
+    uint8_t *next_header = (uint8_t *)ip_header;
+    next_header += len;
     switch (protocol) {
         case 1: {
             printf("\n\tICMP Header\n\t\tType: ");
-            switch (ntohs((*((uint16_t *)ip_header + len)))) {
+            switch (ntohs(*(uint16_t *)next_header)) {
                 case 0: printf("Reply");
                 case 8: printf("Request");
                 default: printf("Unknown");
@@ -177,11 +179,12 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
             break;
         }
         case 6: {
-            parse_TCP((const TCP_header *)(ip_header + len));
+            
+            parse_TCP((const TCP_header *)(next_header));
             break;
         }
         case 17: {
-            parse_UDP((UDP_header *)(ip_header + len));
+            parse_UDP((const UDP_header *)(next_header));
             break;
         }
         default: printf("Unknown");
@@ -247,7 +250,7 @@ void parse_TCP(const TCP_header *tcp_header) {
     printf("\n");
 }
 
-void parse_UDP(UDP_header *udp_header) {
+void parse_UDP(const UDP_header *udp_header) {
     printf("\n\tUDP Header");
     printf("\n\t\tSource Port: ");
     print_port(ntohs(udp_header->src_port));

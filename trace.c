@@ -1,5 +1,6 @@
 #include "trace.h"
 #include "checksum.h"
+#include "smartalloc.h"
 
 struct pcap_pkthdr;
 
@@ -253,8 +254,8 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     uint16_t pseudo_size = 12; // 12 Bytes for IPv4 part  
     pseudo_size += tcp_segment_len;
     pseudo_size += (pseudo_size % 2); // If odd number, pad w/ extra byte that is zero  
-    uint8_t *pseudo_header = malloc((size_t)pseudo_size); 
-    if (pseudo_header == NULL) {
+    uint8_t *pseudo_header = (uint8_t)smartalloc((unsigned long)pseudo_size, "trace.", 257, 0); 
+    if (pseudo_header == NULL) {        
         fprintf(stderr, "Unable to allocate checksum buffer\n");
         return;
     }

@@ -229,9 +229,9 @@ void parse_ARP(const ARP_header *arp_header) {
 void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     // TCP Header: 20 to 60 Bytes
     printf("\n\tTCP Header");
-    printf("\n\t\tSource Port: ");
+    printf("\n\t\tSource Port:  ");
     print_port(ntohs(tcp_header->src_port));
-    printf("\n\t\tDest Port: ");
+    printf("\n\t\tDest Port:  ");
     print_port(ntohs(tcp_header->dest_port));
     printf("\n\t\tSequence Number: %u", ntohl(tcp_header->sequence_num));
     printf("\n\t\tACK Number: %u", ntohl(tcp_header->ack_num));
@@ -282,9 +282,9 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
 
 void parse_UDP(const UDP_header *udp_header) {
     printf("\n\tUDP Header");
-    printf("\n\t\tSource Port: ");
+    printf("\n\t\tSource Port:  ");
     print_port(ntohs(udp_header->src_port));
-    printf("\n\t\tDest Port: ");
+    printf("\n\t\tDest Port:  ");
     print_port(ntohs(udp_header->dest_port));
 }
 

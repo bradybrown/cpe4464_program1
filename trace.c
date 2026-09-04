@@ -180,7 +180,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
         }
         case 6: {
             
-            parse_TCP((const TCP_header *)(next_header));
+            parse_TCP((const TCP_header *)(next_header), ip_header);
             break;
         }
         case 17: {

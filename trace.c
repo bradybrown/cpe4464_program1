@@ -43,6 +43,7 @@ int main(int argc, char *argv[])
 
         printf("\n");
         process_packets(packet_num, pkt_header, pkt_data);
+        printf("\n")
         packet_num++;
     }
 
@@ -56,7 +57,6 @@ int main(int argc, char *argv[])
         pcap_close(handle);
         return EXIT_SUCCESS;
     }
-    printf("\n");
     // printf("Hmmm, we made it to the end of main."); // TODO: Remove later
     pcap_close(handle);
     return EXIT_FAILURE;

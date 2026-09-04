@@ -177,7 +177,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
             break;
         }
         case 6: {
-            parse_TCP((TCP_header *)(ip_header + len));
+            parse_TCP((const TCP_header *)(ip_header + len));
             break;
         }
         case 17: {
@@ -188,7 +188,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
     }    
 }
 
-void parse_ARP(ARP_header *arp_header) {
+void parse_ARP(const ARP_header *arp_header) {
     printf("\n\tARP Request/Reply");
     int opcode = ntohs(arp_header->opcode);
     if (opcode == 1) {
@@ -217,7 +217,7 @@ void parse_ARP(ARP_header *arp_header) {
     printf("\n\t\tTarget IP: %s", inet_ntoa(ip_dest));
 }
 
-void parse_TCP(TCP_header *tcp_header) {
+void parse_TCP(const TCP_header *tcp_header) {
     // TCP Header: 20 to 60 Bytes
     int len = (tcp_header->data_offset_reserved >> 4) * 4;
     printf("\n\tTCP Header");

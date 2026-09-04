@@ -149,12 +149,12 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
     }
 
 
-    uint16_t ck_sum = (ip_header->checksum[0] << 8 | ip_header->checksum[1]);
-    if (in_cksum((unsigned short *)ip_header, (int)len) == 0) {
-        printf("\n\t\tChecksum: Correct (0x%x)", ck_sum);
+    uint16_t ck_sum = ntohs(ip_header->checksum);
+    if (in_cksum((unsigned short *)ip_header, len) == 0) {
+        printf("\n\t\tChecksum: Correct (0x%x)", (unsigned int)ck_sum);
     } 
     else {
-        printf("\n\t\tChecksum: Incorrect (0x%x)", ck_sum);
+        printf("\n\t\tChecksum: Incorrect (0x%x)", (unsigned int)ck_sum);
     }
 
     struct in_addr ip_src;
@@ -237,12 +237,12 @@ void parse_TCP(const TCP_header *tcp_header) {
 
     printf("\n\t\tWindow Size: %u", tcp_header->window_size);
     
-    uint16_t ck_sum = (tcp_header->checksum[0] << 8 | tcp_header->checksum[1]);
+    uint16_t ck_sum = ntohs(tcp_header->checksum);
     if (in_cksum((unsigned short *)tcp_header, len) == 0) {
-        printf("\n\t\tChecksum: Correct (0x%x)", ck_sum);
+        printf("\n\t\tChecksum: Correct (0x%x)", (unsigned int)ck_sum);
     } 
     else {
-        printf("\n\t\tChecksum: Incorrect (0x%x)", ck_sum);
+        printf("\n\t\tChecksum: Incorrect (0x%x)", (unsigned int)ck_sum);
     }
     printf("\n");
 }

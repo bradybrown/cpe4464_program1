@@ -78,7 +78,10 @@ void parse_IP(
 
 void parse_ARP(const ARP_header *arp_header);
 
-void parse_TCP(const TCP_header *ip_header);
+void parse_TCP(
+    const TCP_header *tcp_header, 
+    const IPv4_header *ip_header
+);
 
 void parse_UDP(const UDP_header *udp_header);
 

@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
         pcap_close(handle);
         return EXIT_SUCCESS;
     }
-
+    printf("\n");
     // printf("Hmmm, we made it to the end of main."); // TODO: Remove later
     pcap_close(handle);
     return EXIT_FAILURE;
@@ -172,8 +172,14 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
         case 1: {
             printf("\n\tICMP Header\n\t\tType: ");
             switch (ntohs(*(uint16_t *)next_header)) {
-                case 0: printf("Reply");
-                case 8: printf("Request");
+                case 0: {
+                    printf("Reply");
+                    break;
+                }
+                case 8: {
+                    printf("Request");
+                    break;
+                }
                 default: printf("Unknown");
             }
             break;
@@ -192,7 +198,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
 }
 
 void parse_ARP(const ARP_header *arp_header) {
-    printf("\n\tARP Request/Reply");
+    printf("\n\tARP Header");
     int opcode = ntohs(arp_header->opcode);
     if (opcode == 1) {
         printf("\n\t\tOpcode: Request");
@@ -223,9 +229,9 @@ void parse_ARP(const ARP_header *arp_header) {
 void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     // TCP Header: 20 to 60 Bytes
     printf("\n\tTCP Header");
-    printf("\n\t\tSource Port:  ");
+    printf("\n\t\tSource Port: ");
     print_port(ntohs(tcp_header->src_port));
-    printf("\n\t\tDest Port:  ");
+    printf("\n\t\tDest Port: ");
     print_port(ntohs(tcp_header->dest_port));
     printf("\n\t\tSequence Number: %u", ntohl(tcp_header->sequence_num));
     printf("\n\t\tACK Number: %u", ntohl(tcp_header->ack_num));

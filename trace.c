@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
         printf("\n");
         process_packets(packet_num, pkt_header, pkt_data);
-        printf("\n")
+        printf("\n");
         packet_num++;
     }
 

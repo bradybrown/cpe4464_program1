@@ -225,8 +225,8 @@ void parse_TCP(const TCP_header *tcp_header) {
     print_port(ntohs(tcp_header->src_port));
     printf("\n\t\tDest Port:  ");
     print_port(ntohs(tcp_header->dest_port));
-    printf("\n\t\tSequence Number: %lu", ntohl(tcp_header->sequence_num));
-    printf("\n\t\tACK Number: %lu", ntohl(tcp_header->ack_num));
+    printf("\n\t\tSequence Number: %u", ntohl(tcp_header->sequence_num));
+    printf("\n\t\tACK Number: %u", ntohl(tcp_header->ack_num));
     
     if (tcp_header->flags & (1 << 1)) {printf("\n\t\tSYN Flag: Yes");}
     else {printf("\n\t\tSYN Flag: No");}
@@ -237,7 +237,7 @@ void parse_TCP(const TCP_header *tcp_header) {
 
     printf("\n\t\tWindow Size: %u", tcp_header->window_size);
     
-    uint16_t ck_sum = (tcp_header->checksum[0] << 8 | tcp_header->checksum[1])
+    uint16_t ck_sum = (tcp_header->checksum[0] << 8 | tcp_header->checksum[1]);
     if (in_cksum((unsigned short *)tcp_header, len) == 0) {
         printf("\n\t\tChecksum: Correct (0x%x)", ck_sum);
     } 

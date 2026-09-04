@@ -241,11 +241,11 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     printf("\n\t\tWindow Size: %u", (unsigned int)ntohs(tcp_header->window_size));
     
     // TODO: ck_sum var is good. Incorrect input to the un_cksum() function
-    uint16_t ck_sum = ntohs(tcp_header->checksum);
+    uint16_t tcp_segment_len = ntohs(ip_header->total_length); 
+    tcp_segment_len -= (uint16_t)((ip_header->ver_hl & 0x0F) * 4);
 
-    // int ip_len = (ip_header->ver_hl & 0x0F) * 4;
     uint16_t pseudo_size = 12; // 12 Bytes for IPv4 part  
-    pseudo_size += (uint16_t)tcp_len;
+    pseudo_size += tcp_segment_len;
     pseudo_size += (pseudo_size % 2); // If odd number, pad w/ extra byte that is zero  
     uint8_t *pseudo_header = malloc((size_t)pseudo_size); 
     if (pseudo_header == NULL) {
@@ -267,6 +267,7 @@ void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     pseudo_header[pseudo_header_offset + 16] = 0x00;
     pseudo_header[pseudo_header_offset + 17] = 0x00;
 
+    uint16_t ck_sum = ntohs(tcp_header->checksum);
     if (in_cksum((unsigned short *)pseudo_header, (int)pseudo_size) == 0) {
         printf("\n\t\tChecksum: Correct (0x%x)", (unsigned int)ck_sum);
     } 

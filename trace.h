@@ -29,7 +29,9 @@ typedef struct ARP_header {
 typedef struct IPv4_header {
     uint8_t ver_hl;
     uint8_t tos;
-    uint8_t len_id_fragOffset[6];   // We dont use
+    uint16_t total_length;
+    uint16_t identification;
+    uint16_t flags_frag_offset;
     uint8_t ttl;
     uint8_t protocol;
     uint16_t checksum;

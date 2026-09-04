@@ -222,7 +222,6 @@ void parse_ARP(const ARP_header *arp_header) {
 
 void parse_TCP(const TCP_header *tcp_header, const IPv4_header *ip_header) {
     // TCP Header: 20 to 60 Bytes
-    uint16_t tcp_len = (tcp_header->data_offset_reserved >> 4) * 4;
     printf("\n\tTCP Header");
     printf("\n\t\tSource Port:  ");
     print_port(ntohs(tcp_header->src_port));

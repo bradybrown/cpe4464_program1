@@ -52,14 +52,14 @@
  *      Checksum routine for Internet Protocol family headers (C Version)
  *
  *	addr - a pointer to the buffer you wish to compute the checksum over
- *      len - the number of bytes you wish to compute the checksum over
+ *  len - the number of bytes you wish to compute the checksum over
  *
  *  This function will return the Internet Checksum already in network byte
- *   order.  When used to verify the checksum, and the checksum bytes are
+ *   order.  When used to verify the checksum, and the checksum byts are
  *   included in the buffer passed in via addr and len, the function will
  *   return 0 when the checksum is correct and non-zero otherwise.
  */
-unsigned short in_cksum(unsigned short *addr, int len)
+unsigned short in_cksum(unsigned short *addr,int len)
 {
         register int sum = 0;
         u_short answer = 0;

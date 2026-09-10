@@ -165,12 +165,12 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
 
     printf("\n\t\tSender IP: %s", inet_ntoa(ip_src));
     printf("\n\t\tDest IP: %s", inet_ntoa(ip_dest));
-    printf("\n");
 
     uint8_t *next_header = (uint8_t *)ip_header;
     next_header += len;
     switch (protocol) {
         case 1: {
+            printf("\n");
             printf("\n\tICMP Header\n\t\tType: ");
             switch (*(uint16_t *)next_header) {
                 case 0: {
@@ -188,11 +188,12 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
             break;
         }
         case 6: {
-            
+            printf("\n");
             parse_TCP((const TCP_header *)(next_header), ip_header);
             break;
         }
         case 17: {
+            printf("\n");
             parse_UDP((const UDP_header *)(next_header));
             break;
         }

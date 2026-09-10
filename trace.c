@@ -182,6 +182,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
                     break;
                 }
                 default: 
+                    printf("Unknown");
                     break; // Protocol was already printed as Unknown
             }
             break;

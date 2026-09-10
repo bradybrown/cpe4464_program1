@@ -28,6 +28,8 @@ all:  trace-$(EXEC_SUFFIX)
 trace-$(EXEC_SUFFIX): trace.c
 	$(CC) $(CFLAGS) $(OSINC) $(OSLIB) $(OSDEF) -o $@ trace.c checksum.c smartalloc.c -lpcap
 
+
+
 handin: README
 	~bellardo/bin/rcvhandin bellardo p1 README smartalloc.c smartalloc.h checksum.c checksum.h trace.c trace.h Makefile
 

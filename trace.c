@@ -196,7 +196,7 @@ void parse_IP(const IPv4_header *ip_header, uint32_t caplen) {
             parse_UDP((const UDP_header *)(next_header));
             break;
         }
-        default: printf("Unknown");
+        default: break;
     }    
 }
 
